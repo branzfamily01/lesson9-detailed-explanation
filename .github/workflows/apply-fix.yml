@@ -1,0 +1,25 @@
+name: Apply LESSON 9 interaction fix
+on:
+  push:
+    paths:
+      - 'payload.b64'
+      - '.github/workflows/apply-fix.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore index.html
+        run: |
+          base64 --decode payload.b64 | gunzip > index.html
+          test -s index.html
+          grep -q '和訳' index.html
+      - name: Commit fixed interactive deck
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Add translations and neutral question titles' || exit 0
+          git push
